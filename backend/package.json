@@ -1,0 +1,32 @@
+{
+  "name": "gym-management-backend",
+  "version": "1.0.0",
+  "description": "Business Intelligence Gym Management System Backend",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "import:csv": "node src/scripts/importCSV.js",
+    "import:checkins": "node src/scripts/importCheckins.js",
+    "setup:db": "node src/scripts/setupDB.js"
+  },
+  "keywords": ["gym", "management", "business-intelligence"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "@supabase/supabase-js": "^2.38.3",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.0",
+    "csv-parser": "^3.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
