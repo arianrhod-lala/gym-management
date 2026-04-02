@@ -89,7 +89,6 @@ A Business Intelligence gym management system designed for a small gym (0-100 me
 - name (VARCHAR, UNIQUE)
 - gender (VARCHAR: Male, Female)
 - membership_type (VARCHAR: Monthly, Session)
-- qr_code (VARCHAR, UNIQUE) - For QR code authentication
 - created_at (TIMESTAMP)
 - updated_at (TIMESTAMP)
 ```
@@ -121,9 +120,8 @@ A Business Intelligence gym management system designed for a small gym (0-100 me
 1. **Login Page** - Email/password authentication
 2. **Dashboard Home** - Overview metrics (revenue, active members, check-ins today) & revenue chart
 3. **Members Page** - Member list with search/filter by name or membership type
-4. **Attendance/Check-in Page** - QR code scanner for member check-in + payment input
-5. **Analytics Page** - Weekly attendance chart + peak hours visualization
-6. **Add Member Page** - Registration form (name, gender, membership type) + auto-generate QR code
+4. **Analytics Page** - Weekly attendance chart + peak hours visualization
+5. **Add Member Page** - Registration form (name, gender, membership type) + auto-generate QR code
 
 ### Reusable Components
 - Navbar/Sidebar navigation
@@ -166,7 +164,6 @@ A Business Intelligence gym management system designed for a small gym (0-100 me
 - `GET /api/members/:id` - Get member details
 - `PUT /api/members/:id` - Update member
 - `DELETE /api/members/:id` - Delete member
-- `GET /api/members/qr/:qr_code` - Get member by QR code (for check-in)
 
 ### Check-ins
 - `POST /api/check-ins` - Log member check-in (with payment optional)
@@ -181,21 +178,7 @@ A Business Intelligence gym management system designed for a small gym (0-100 me
 
 ---
 
-## 8. DEVELOPMENT TIMELINE (1 Week)
-
-| Day | Tasks |
-|-----|-------|
-| **Day 1** | Setup: Project structure, Supabase setup, API skeleton (Node.js) |
-| **Day 2** | Backend: Authentication, Member & Attendance APIs |
-| **Day 3** | Backend: Analytics APIs; Frontend: Base layout, Login page |
-| **Day 4** | Frontend: Dashboard pages (home, members, attendance) |
-| **Day 5** | Frontend: Forms, Member registration, responsive design |
-| **Day 6** | Testing, Bug fixes, Optimization |
-| **Day 7** | Final testing, Documentation, Deployment prep |
-
----
-
-## 9. DESIGN REFERENCE
+## 8. DESIGN REFERENCE
 
 **Figma Design Elements:**
 - Dark purple/blue theme with accent colors
@@ -207,7 +190,7 @@ A Business Intelligence gym management system designed for a small gym (0-100 me
 
 ---
 
-## 10. DELIVERABLES
+## 9. DELIVERABLES
 
 - [ ] Fully functional backend (Node.js + Supabase)
 - [ ] Responsive frontend (Desktop & Mobile)
@@ -220,9 +203,9 @@ A Business Intelligence gym management system designed for a small gym (0-100 me
 
 ---
 
-## 11. NOTES & ASSUMPTIONS
+## 10. NOTES & ASSUMPTIONS
 
-- **CSV Data Import**: gym_records.csv will be imported on Day 1 (contains 40+ member records with historical check-ins)
+- **CSV Data Import**: gym_records.csv will be imported (contains 40+ member records with historical check-ins)
   - CSV columns map to: Date → check_in_date, Name → member name, Time In → check_in_time, Payment (PHP) → payment_amount, Gender, Membership
   - Unique members will be extracted and loaded into members table
   - QR codes will be generated using a library (e.g., qrcode npm package)
@@ -233,11 +216,5 @@ A Business Intelligence gym management system designed for a small gym (0-100 me
 - Only 1 admin user (gym owner) required
 - No email/contact fields needed in member profile for v1
 - Membership types: Monthly (900 PHP), Session (100 PHP) - based on Excel data
-- 1-week timeline is aggressive; prioritize core features
 
 ---
-
-**Next Steps:**
-1. Review this specification with gym owner
-2. Finalize database schema based on Excel column mapping
-3. Begin Day 1 setup phase
