@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Check if already logged in. If yes, skip login and go to dashboard.
     const existingToken = localStorage.getItem('gym_token');
     if (existingToken) {
-        window.location.href = '/dashboard.html';
+        window.location.href = '/';
         return;
     }
 
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // If successful, api.js already saved the token to localStorage.
             // Just redirect to the dashboard!
-            window.location.href = '/dashboard.html';
+            window.location.href = '/';
             
         } catch (error) {
             // If login fails (wrong password, server down, etc.)
