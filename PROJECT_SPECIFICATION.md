@@ -1,6 +1,6 @@
 # Gym Management System - Project Specification
 
-**Project Duration:** 1 Week  
+**Project Duration:** NA 
 **Client:** Gym Owner (Admin)  
 **Date Created:** April 2, 2026
 
@@ -20,7 +20,7 @@ A Business Intelligence gym management system designed for a small gym (0-100 me
 
 | Layer | Technology |
 |-------|-----------|
-| **Frontend** | HTML, CSS, JavaScript (Vanilla or lightweight framework) |
+| **Frontend** | HTML, CSS, JavaScript, React |
 | **Backend** | Node.js (Express.js recommended) |
 | **Database** | Supabase (PostgreSQL) |
 | **Hosting** | TBD |
