@@ -1,4 +1,20 @@
 import { supabase } from "../db/supabaseClient.js";
+import { getCheckIns } from "./checkInService.js";
+
+const CHECK_INS_PAGE_SIZE = 1000;
+const GYM_OPEN_HOUR = 6;
+const GYM_CLOSE_HOUR = 22;
+
+const formatHourAmPm = (hour) => {
+  const period = hour >= 12 ? "PM" : "AM";
+  const hour12 = hour % 12 || 12;
+  return `${hour12}:00 ${period}`;
+};
+
+const fetchAllCheckIns = async (columns) => {
+  const rows = await getCheckIns({});
+  return rows;
+};
 
 /**
  * Get dashboard metrics
@@ -9,19 +25,18 @@ export const getDashboardMetrics = async () => {
     // Get total members
     const { data: members, error: membersError } = await supabase
       .from("members")
-      .select("id");
+      .select("id, membership_type");
 
     if (membersError) throw membersError;
 
-    const totalMembers = members?.length || 0;
+    const totalMembers = (members || []).filter((member) =>
+      String(member.membership_type || "").toLowerCase().includes("monthly")
+    ).length;
 
     // Get all check-in data
-    const { data: allCheckIns, error: checkInsError } = await supabase
-      .from("check_ins")
-      .select("member_id, check_in_date, payment_amount")
-      .order("check_in_date", { ascending: false });
-
-    if (checkInsError) throw checkInsError;
+    const allCheckIns = await fetchAllCheckIns(
+      "member_id, check_in_date, payment_amount, created_at"
+    );
 
     if (!allCheckIns || allCheckIns.length === 0) {
       return {
@@ -37,7 +52,9 @@ export const getDashboardMetrics = async () => {
 
     // Find the two most recent months with data
     const monthsWithData = [...new Set(
-      allCheckIns.map(c => c.check_in_date.slice(0, 7))
+      allCheckIns
+        .map((c) => String(c.check_in_date || "").slice(0, 7))
+        .filter(Boolean)
     )].sort().reverse();
 
     const currentMonth = monthsWithData[0] || "2026-03";
@@ -49,18 +66,19 @@ export const getDashboardMetrics = async () => {
     // Active members in current month
     const activeInCurrent = new Set(
       allCheckIns
-        .filter(c => c.check_in_date.startsWith(currentMonth))
+        .filter(c => String(c.check_in_date || "").startsWith(currentMonth))
+        .filter(c => String(c.member_id || "").startsWith("session-") === false)
         .map(c => c.member_id)
     ).size;
 
     // Current month revenue
     const currentMonthTotal = allCheckIns
-      .filter(c => c.check_in_date.startsWith(currentMonth))
+      .filter(c => String(c.check_in_date || "").startsWith(currentMonth))
       .reduce((sum, c) => sum + (c.payment_amount || 0), 0);
 
     // Previous month revenue
     const previousMonthTotal = allCheckIns
-      .filter(c => c.check_in_date.startsWith(previousMonth))
+      .filter(c => String(c.check_in_date || "").startsWith(previousMonth))
       .reduce((sum, c) => sum + (c.payment_amount || 0), 0);
 
     // Revenue percentage change
@@ -98,14 +116,7 @@ export const getDashboardMetrics = async () => {
  */
 export const getWeeklyAttendance = async (weeksBack = 1) => {
   try {
-    // Get all check-in data
-    const { data, error } = await supabase
-      .from("check_ins")
-      .select("check_in_date")
-      .order("check_in_date", { ascending: false })
-      .limit(1000);
-
-    if (error) throw error;
+    const data = await fetchAllCheckIns("check_in_date");
 
     if (!data || data.length === 0) {
       return [
@@ -162,27 +173,29 @@ export const getWeeklyAttendance = async (weeksBack = 1) => {
  */
 export const getPeakHours = async () => {
   try {
-    const { data, error } = await supabase
-      .from("check_ins")
-      .select("check_in_time");
-
-    if (error) throw error;
+    const data = await fetchAllCheckIns("check_in_time");
 
     // Extract hour from time and aggregate
-    const hourlyData = Array.from({ length: 24 }, (_, i) => ({
-      hour: `${String(i).padStart(2, "0")}:00`,
+    const hourlyData = Array.from({ length: GYM_CLOSE_HOUR - GYM_OPEN_HOUR + 1 }, (_, index) => ({
+      hourNumber: GYM_OPEN_HOUR + index,
+      hour: formatHourAmPm(GYM_OPEN_HOUR + index),
       count: 0,
     }));
 
+    const hourlyMap = new Map(hourlyData.map((item) => [item.hourNumber, item]));
+
     data?.forEach((check) => {
-      const hour = parseInt(check.check_in_time.split(":")[0]);
-      if (hour >= 0 && hour < 24) {
-        hourlyData[hour].count++;
+      const hour = parseInt(String(check.check_in_time || "00:00:00").split(":")[0], 10);
+      if (hour >= GYM_OPEN_HOUR && hour <= GYM_CLOSE_HOUR) {
+        const slot = hourlyMap.get(hour);
+        if (slot) slot.count++;
       }
     });
 
     // Filter out hours with zero activity
-    return hourlyData.filter((h) => h.count > 0);
+    return hourlyData
+      .filter((h) => h.count > 0)
+      .map(({ hour, count }) => ({ hour, count }));
   } catch (error) {
     throw new Error(`Failed to fetch peak hours: ${error.message}`);
   }
@@ -194,21 +207,24 @@ export const getPeakHours = async () => {
  */
 export const getMonthlyRevenue = async () => {
   try {
-    // Get data for last 12 months
-    const { data, error } = await supabase
-      .from("check_ins")
-      .select("check_in_date, payment_amount");
-
-    if (error) throw error;
+    const data = await fetchAllCheckIns(
+      "check_in_date, payment_amount, created_at"
+    );
 
     // Aggregate by month
     const monthlyRevenue = {};
     data?.forEach((check) => {
-      const month = check.check_in_date.slice(0, 7); // YYYY-MM
+      const monthSource = check.check_in_date || check.created_at?.slice(0, 10);
+      if (!monthSource) return;
+
+      const month = monthSource.slice(0, 7); // YYYY-MM
+      const payment = Number(check.payment_amount || 0);
+
       if (!monthlyRevenue[month]) {
         monthlyRevenue[month] = 0;
       }
-      monthlyRevenue[month] += check.payment_amount || 0;
+
+      monthlyRevenue[month] += Number.isFinite(payment) ? payment : 0;
     });
 
     return Object.entries(monthlyRevenue)

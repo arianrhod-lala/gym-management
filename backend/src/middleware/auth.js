@@ -1,5 +1,8 @@
 import jwt from "jsonwebtoken";
 
+const getJwtSecret = () =>
+  process.env.JWT_SECRET || "dev-local-jwt-secret-change-me";
+
 export const authMiddleware = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -14,7 +17,7 @@ export const authMiddleware = (req, res, next) => {
       return res.status(401).json({ error: "Invalid authorization header" });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, getJwtSecret());
     req.user = decoded;
     next();
   } catch (error) {

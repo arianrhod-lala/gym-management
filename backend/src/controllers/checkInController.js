@@ -2,7 +2,7 @@ import * as checkInService from "../services/checkInService.js";
 
 export const logCheckIn = async (req, res) => {
   try {
-    const { member_id, payment_amount } = req.body;
+    const { member_id, payment_amount, check_in_date, check_in_time } = req.body;
 
     if (!member_id) {
       return res.status(400).json({ error: "member_id is required" });
@@ -11,6 +11,8 @@ export const logCheckIn = async (req, res) => {
     const checkIn = await checkInService.logCheckIn({
       member_id,
       payment_amount,
+      check_in_date,
+      check_in_time,
     });
 
     res.status(201).json(checkIn);

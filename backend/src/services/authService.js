@@ -2,6 +2,20 @@ import { supabase } from "../db/supabaseClient.js";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+const isSupabaseConfigured = () =>
+  Boolean(
+    process.env.SUPABASE_URL &&
+      (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY)
+  );
+
+const getJwtSecret = () =>
+  process.env.JWT_SECRET || "dev-local-jwt-secret-change-me";
+
+const getDevCredentials = () => ({
+  email: process.env.DEV_ADMIN_EMAIL || "admin@wynfitness.com",
+  password: process.env.DEV_ADMIN_PASSWORD || "admin12345",
+});
+
 /**
  * Authenticate owner with email/password
  * @param {string} email
@@ -10,6 +24,26 @@ import jwt from "jsonwebtoken";
  */
 export const loginOwner = async (email, password) => {
   try {
+    const dev = getDevCredentials();
+    const useDevFallback = (!isSupabaseConfigured() || email === dev.email) && process.env.NODE_ENV !== "production";
+
+    if (useDevFallback) {
+      if (email !== dev.email || password !== dev.password) {
+        throw new Error("Invalid password");
+      }
+
+      const token = jwt.sign(
+        { id: "dev-owner", email: dev.email },
+        getJwtSecret(),
+        { expiresIn: "24h" }
+      );
+
+      return {
+        user: { id: "dev-owner", email: dev.email },
+        token,
+      };
+    }
+
     // Get user from database
     const { data: users, error: queryError } = await supabase
       .from("users")
@@ -32,7 +66,7 @@ export const loginOwner = async (email, password) => {
     // Generate JWT token
     const token = jwt.sign(
       { id: user.id, email: user.email },
-      process.env.JWT_SECRET,
+      getJwtSecret(),
       { expiresIn: "24h" }
     );
 
@@ -53,6 +87,10 @@ export const loginOwner = async (email, password) => {
  */
 export const registerOwner = async (email, password) => {
   try {
+    if (!isSupabaseConfigured()) {
+      throw new Error("Supabase is not configured for registration");
+    }
+
     // Hash password
     const salt = await bcryptjs.genSalt(10);
     const passwordHash = await bcryptjs.hash(password, salt);
