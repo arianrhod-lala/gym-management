@@ -28,7 +28,7 @@ export const getMemberById = async (req, res) => {
 
 export const createMember = async (req, res) => {
   try {
-    const { name, gender, membership_type } = req.body;
+    const { name, gender, membership_type, start_date, end_date } = req.body;
 
     if (!name || !gender || !membership_type) {
       return res
@@ -40,6 +40,8 @@ export const createMember = async (req, res) => {
       name,
       gender,
       membership_type,
+      start_date,
+      end_date,
     });
 
     res.status(201).json(member);

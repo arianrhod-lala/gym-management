@@ -4,10 +4,22 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
+
+const missingConfigMessage =
+  "Supabase is not configured. Add SUPABASE_URL and SUPABASE_SERVICE_KEY (or SUPABASE_ANON_KEY) in backend/.env.";
+
+const createMissingClient = () => ({
+  from: () => {
+    throw new Error(missingConfigMessage);
+  },
+});
 
 if (!supabaseUrl || !supabaseKey) {
-  throw new Error("Missing Supabase credentials in .env file");
+  console.warn(missingConfigMessage);
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase =
+  supabaseUrl && supabaseKey
+    ? createClient(supabaseUrl, supabaseKey)
+    : createMissingClient();

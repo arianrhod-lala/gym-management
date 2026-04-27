@@ -57,6 +57,25 @@ export const getMemberById = async (memberId) => {
 export const createMember = async (memberData) => {
   try {
     const memberId = randomUUID();
+    const nowIso = new Date().toISOString();
+
+    let createdAt = nowIso;
+    if (memberData.start_date) {
+      const parsedStart = new Date(`${memberData.start_date}T00:00:00`);
+      if (Number.isNaN(parsedStart.getTime())) {
+        throw new Error("Invalid start_date format. Use YYYY-MM-DD");
+      }
+      createdAt = parsedStart.toISOString();
+    }
+
+    let updatedAt = nowIso;
+    if (memberData.end_date) {
+      const parsedEnd = new Date(`${memberData.end_date}T23:59:59`);
+      if (Number.isNaN(parsedEnd.getTime())) {
+        throw new Error("Invalid end_date format. Use YYYY-MM-DD");
+      }
+      updatedAt = parsedEnd.toISOString();
+    }
 
     // Insert member
     const { data, error } = await supabase
@@ -67,8 +86,8 @@ export const createMember = async (memberData) => {
           name: memberData.name,
           gender: memberData.gender,
           membership_type: memberData.membership_type,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+          created_at: createdAt,
+          updated_at: updatedAt,
         },
       ])
       .select();
