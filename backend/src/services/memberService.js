@@ -61,20 +61,20 @@ export const createMember = async (memberData) => {
 
     let createdAt = nowIso;
     if (memberData.start_date) {
-      const parsedStart = new Date(`${memberData.start_date}T00:00:00`);
+      const parsedStart = new Date(`${memberData.start_date}T12:00:00`)
       if (Number.isNaN(parsedStart.getTime())) {
-        throw new Error("Invalid start_date format. Use YYYY-MM-DD");
+        throw new Error("Invalid start_date format. Use YYYY-MM-DD")
       }
-      createdAt = parsedStart.toISOString();
+      createdAt = parsedStart.toISOString()
     }
 
     let updatedAt = nowIso;
     if (memberData.end_date) {
-      const parsedEnd = new Date(`${memberData.end_date}T23:59:59`);
+      const parsedEnd = new Date(`${memberData.end_date}T12:00:00`)
       if (Number.isNaN(parsedEnd.getTime())) {
-        throw new Error("Invalid end_date format. Use YYYY-MM-DD");
+        throw new Error("Invalid end_date format. Use YYYY-MM-DD")
       }
-      updatedAt = parsedEnd.toISOString();
+      updatedAt = parsedEnd.toISOString()
     }
 
     // Insert member
