@@ -2659,17 +2659,34 @@ const App = () => {
     const handleAddMember = async (payload) => {
         if (!token) throw new Error("Not authenticated");
 
-        const member = await createMember(token, payload);
+        try {
+            const member = await createMember(token, payload);
 
-        await logCheckIn(token, {
-            member_id: member.id,
-            payment_amount: PRICE_MONTHLY,
-            check_in_date: payload.start_date,
-            check_in_time: "08:00:00"
-        });
+            // Refresh members immediately so UI reflects the new member even if check-in logging fails
+            try {
+                await loadData(token);
+            } catch (refreshErr) {
+                console.error("Failed to refresh data after creating member:", refreshErr);
+            }
 
-        await loadData(token);
-        return member;
+            // Attempt to log initial payment/check-in, but do not block success if it fails
+            try {
+                await logCheckIn(token, {
+                    member_id: member.id,
+                    payment_amount: PRICE_MONTHLY,
+                    check_in_date: payload.start_date,
+                    check_in_time: "08:00:00"
+                });
+            } catch (checkInErr) {
+                console.error("Failed to log check-in after member creation:", checkInErr);
+            }
+
+            return member;
+        } catch (err) {
+            console.error("Add member failed:", err);
+            // Surface helpful message
+            throw new Error(err?.message || "Failed to add member. See console for details.");
+        }
     };
 
     if (!token) {
