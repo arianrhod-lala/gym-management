@@ -2284,7 +2284,8 @@ const AddMemberPage = ({ onAddMember }) => {
                 name,
                 gender,
                 membership_type: "Monthly",
-                start_date: startDate
+                start_date: startDate,
+                end_date: endDate
             });
 
             const payload = JSON.stringify({
@@ -2341,7 +2342,7 @@ const AddMemberPage = ({ onAddMember }) => {
     return (
         <section className="card form-card">
             <h2>Add New Monthly Member</h2>
-            <p className="tiny-note">This action creates a Monthly member and logs payment amount of {pesoFormatter.format(PRICE_MONTHLY)}.</p>
+            <p className="tiny-note">This action creates a Monthly member with the selected start and end dates.</p>
 
             <div className="date-summary-chip" aria-live="polite">
                 <span>{fullDateFormatter.format(new Date(startDate))}</span>
@@ -2662,23 +2663,11 @@ const App = () => {
         try {
             const member = await createMember(token, payload);
 
-            // Refresh members immediately so UI reflects the new member even if check-in logging fails
+            // Refresh members immediately so UI reflects the new member
             try {
                 await loadData(token);
             } catch (refreshErr) {
                 console.error("Failed to refresh data after creating member:", refreshErr);
-            }
-
-            // Attempt to log initial payment/check-in, but do not block success if it fails
-            try {
-                await logCheckIn(token, {
-                    member_id: member.id,
-                    payment_amount: PRICE_MONTHLY,
-                    check_in_date: payload.start_date,
-                    check_in_time: "08:00:00"
-                });
-            } catch (checkInErr) {
-                console.error("Failed to log check-in after member creation:", checkInErr);
             }
 
             return member;
