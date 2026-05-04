@@ -752,6 +752,7 @@ select {
     border: 1px solid #2f2f36;
     background: #111217;
     padding: 1rem;
+    color: var(--white);
 }
 
 .home-modal-head {
@@ -766,6 +767,7 @@ select {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 1.25rem;
+    color: #f5f7fb;
 }
 
 .home-modal-close {
@@ -792,6 +794,7 @@ select {
 .home-modal-body .tiny-note,
 .home-modal-body .insight {
     font-size: 0.94rem;
+    color: #d6dbe6;
 }
 
 .insight-action-cards {
@@ -805,15 +808,17 @@ select {
     cursor: pointer;
     background: linear-gradient(120deg, #121218 0%, #0b0c11 100%);
     border-color: #24242a;
+    color: var(--white);
 }
 
 .insight-action-card h3 {
     font-size: 0.95rem;
     margin-bottom: 0.22rem;
+    color: #f5f7fb;
 }
 
 .insight-action-card p {
-    color: var(--muted);
+    color: #aeb6c7;
     font-size: 0.8rem;
 }
 
@@ -965,6 +970,12 @@ select {
     font-size: 0.88rem;
 }
 
+.report-summary-card,
+.qr-box,
+.qr-meta .simple-row {
+    color: var(--white);
+}
+
 body[data-theme="light"] {
     --black-0: #f4f5f8;
     --black-1: #ffffff;
@@ -1024,6 +1035,56 @@ body[data-theme="light"] .icon--sun {
 
 body[data-theme="light"] .home-modal-backdrop {
     background: rgba(89, 100, 121, 0.36);
+}
+
+body[data-theme="light"] .home-modal-card {
+    color: #171f2d;
+    background: #ffffff;
+}
+
+body[data-theme="light"] .home-modal-head h3 {
+    color: #171f2d;
+}
+
+body[data-theme="light"] .home-modal-body .controls-row label,
+body[data-theme="light"] .home-modal-body .tiny-note,
+body[data-theme="light"] .home-modal-body .insight {
+    color: #394355;
+}
+
+body[data-theme="light"] .insight-action-card {
+    color: #171f2d;
+    background: linear-gradient(120deg, #ffffff 0%, #f2f5fa 100%);
+    border-color: #d7dde7;
+}
+
+body[data-theme="light"] .insight-action-card h3 {
+    color: #171f2d;
+}
+
+body[data-theme="light"] .insight-action-card p {
+    color: #4f5a6d;
+}
+
+body[data-theme="light"] .insight-candidate-head {
+    color: #5a6476;
+    background: #edf2f8;
+    border-color: #d4dbe8;
+}
+
+body[data-theme="light"] .insight-candidate-row strong {
+    color: #171f2d;
+}
+
+body[data-theme="light"] .report-summary-card,
+body[data-theme="light"] .qr-box,
+body[data-theme="light"] .qr-meta .simple-row {
+    color: #171f2d;
+}
+
+body[data-theme="light"] .qr-meta .simple-row span,
+body[data-theme="light"] .qr-meta .simple-row strong {
+    color: #171f2d;
 }
 
 body[data-theme="light"] .home-stat-card p,
